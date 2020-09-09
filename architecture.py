@@ -47,7 +47,8 @@ class VAE(torch.nn.Module):
 
         xi = torch.normal(torch.zeros_like(mean))
         # std is actually log(std**2)
-        Z = mean + xi * torch.exp(0.5 * log_var)
+        #Z = mean + xi * torch.exp(0.5 * log_var)
+        Z = mean + xi * log_var
 
         return Z, mean, log_var
 
