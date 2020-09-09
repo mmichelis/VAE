@@ -39,6 +39,10 @@ def run_model(dataloader, args):
         if not os.path.exists("TrainedModel"):
             os.makedirs("TrainedModel")
 
+    # Output directory might not exist yet
+    if not os.path.exists("Output"):
+        os.makedirs("Output")
+
 
     if args.mode == 'train':
         ### Create optimizer and scheduler
@@ -101,10 +105,6 @@ def run_model(dataloader, args):
 
 
     elif args.mode == 'test':
-        # Output directory might not exist yet
-        if not os.path.exists("Output"):
-            os.makedirs("Output")
-
         epoch_loss, epoch_acc = run_epoch(network, optimizer, dataloader, mode=args.mode)
 
         ### Print statistics
@@ -115,10 +115,6 @@ def run_model(dataloader, args):
 
 
     elif args.mode == 'inference':
-        # Output directory might not exist yet
-        if not os.path.exists("Output"):
-            os.makedirs("Output")
-
         _, _ = run_epoch(network, optimizer, dataloader, mode=args.mode)
 
 
@@ -176,7 +172,7 @@ def run_epoch(network, optimizer, dataloader, mode):
                     dim=-1)
                 
                 loss = torch.mean(rec_loss + kl_loss)
-                
+
             loss.backward()
             optimizer.step()   
                       
