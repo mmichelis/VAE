@@ -1,8 +1,16 @@
+# ------------------------------------------------------------------------------
+# Utility functions that are used elsewhere but for readabilty reasons have been
+# moved here.
+# ------------------------------------------------------------------------------
+
 import os
 import torch
 
 
 def load_model(model):
+    """
+    Load the model parameters from an existing trained model. 
+    """
     fin = False
     backup1 = False
 

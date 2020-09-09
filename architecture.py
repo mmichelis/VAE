@@ -1,8 +1,18 @@
+# ------------------------------------------------------------------------------
+# PyTorch implementation of the network architecture. 
+# ------------------------------------------------------------------------------
+
 import torch 
 import numpy as np
 
 
 class VAE(torch.nn.Module):
+    """
+    Variational Autoencoder architecture with Conv2D in the encoder, and ConvTranspose2d in the decoder. The encoder outputs mean and log(variance) through two linear layers (which follow the Conv2D layers before that).
+
+    Encoder expects an input of shape [N, 1, 28, 28]
+    Decoder expects an input of shape [N, hidden_dim]
+    """
     def __init__(self):
         super(VAE, self).__init__()
 
@@ -47,8 +57,8 @@ class VAE(torch.nn.Module):
 
         xi = torch.normal(torch.zeros_like(mean))
         # std is actually log(std**2)
-        #Z = mean + xi * torch.exp(0.5 * log_var)
-        Z = mean + xi * log_var
+        Z = mean + xi * torch.exp(0.5 * log_var)
+        #Z = mean + xi * log_var
 
         return Z, mean, log_var
 
