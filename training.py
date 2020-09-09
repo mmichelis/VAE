@@ -56,7 +56,7 @@ def run_model(dataloader, args):
         
         optimizer = torch.optim.Adam(
                             network.parameters(), 
-                            lr=5e-3,
+                            lr=args.lr,
                             weight_decay=1e-4
                         )
         
