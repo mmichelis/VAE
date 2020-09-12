@@ -49,7 +49,7 @@ def run_model(dataloader, args):
 
         # optimizer = torch.optim.SGD(
         #                     network.parameters(), 
-        #                     lr=5e-3, 
+        #                     lr=args.lr, 
         #                     momentum=0.9, 
         #                     weight_decay=1e-4
         #                 )
@@ -64,10 +64,14 @@ def run_model(dataloader, args):
         lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
                             optimizer, 
                             milestones=[int(args.epochs/3), int(2*args.epochs/3)], 
-                            gamma=0.5
+                            gamma=0.1
                         )
 
         epoch_history = []
+
+        pytorch_total_params = sum(p.numel() for p in network.parameters() if p.requires_grad)
+        print(f"Total of trainable parameters: {pytorch_total_params}")
+
 
         ### Run epochs
         for epoch in range(args.epochs):
@@ -86,7 +90,7 @@ def run_model(dataloader, args):
             epoch_history.append(epoch_loss)
 
             ### Store model as backup
-            if epoch % args.checkpoint_epochs == 0:
+            if epoch % args.checkpoint_epochs == 0 and epoch > 0:
                 torch.save(network.state_dict(), "TrainedModel/modelBackup.pth")
 
                 ### Create and Store Plots
@@ -105,17 +109,17 @@ def run_model(dataloader, args):
 
 
     elif args.mode == 'test':
-        epoch_loss, epoch_acc = run_epoch(network, optimizer, dataloader, mode=args.mode)
+        epoch_loss, epoch_acc = run_epoch(network, None, dataloader, mode=args.mode)
 
         ### Print statistics
         print("-"*30)
-        print(f"Loss: {epoch_loss:.2e} Acc: {epoch_acc:.2e}")
+        print(f"Loss: {epoch_loss:.2e} Acc: {epoch_acc:.2e}")   
         print("-"*30)
             
 
 
     elif args.mode == 'inference':
-        _, _ = run_epoch(network, optimizer, dataloader, mode=args.mode)
+        _, _ = run_epoch(network, None, dataloader, mode=args.mode)
 
 
     return
@@ -160,7 +164,7 @@ def run_epoch(network, optimizer, dataloader, mode):
             with torch.set_grad_enabled(True):
                 network.zero_grad()
 
-                Z, mean, std = network.encoder(X)
+                Z, mean, logvar = network.encoder(X)
                 X_hat = network.decoder(Z)  # Shape [N, 1, 28, 28]
 
                 # Compute reconstruction loss between input and output of network
@@ -168,7 +172,7 @@ def run_epoch(network, optimizer, dataloader, mode):
                 
                 # Compute Kullback-Leibler divergence 
                 kl_loss = -0.5 * torch.sum(
-                    1 + std - mean**2 - torch.exp(std), 
+                    1 + logvar - mean**2 - torch.exp(logvar), 
                     dim=-1)
                 
                 loss = torch.mean(rec_loss + kl_loss)
